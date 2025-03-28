@@ -105,7 +105,7 @@ git clone https://github.com/AayushBharti/Next-ventures.git
 cd pitchify
 ```
 
-**Installation**
+<!-- **Installation**
 
 Install the project dependencies using npm:
 
@@ -127,9 +127,9 @@ SANITY_TOKEN=
 AUTH_SECRET=
 AUTH_GITHUB_ID=
 AUTH_GITHUB_SECRET=
-```
+``` -->
 
-Replace the placeholder values with your actual Sanity credentials. You can
+<!-- Replace the placeholder values with your actual Sanity credentials. You can
 obtain these credentials by signing up & creating a new project on the
 [Sanity website](https://www.sanity.io/).
 
@@ -140,4 +140,4 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the
-project.
+project. -->

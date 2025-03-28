@@ -21,11 +21,6 @@ const nextConfig: NextConfig = {
     ppr: "incremental",
     // after: true,
   },
-  devIndicators: {
-    appIsrStatus: true,
-    buildActivity: true,
-    buildActivityPosition: "bottom-right",
-  },
 }
 
 export default withSentryConfig(nextConfig, {
@@ -56,7 +51,9 @@ export default withSentryConfig(nextConfig, {
   // tunnelRoute: "/monitoring",
 
   // Hides source maps from generated client bundles
-  hideSourceMaps: true,
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,

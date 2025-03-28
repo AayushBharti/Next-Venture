@@ -2,9 +2,9 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import React from "react"
-import { twMerge } from "tailwind-merge"
 
-import { type IntegrationsType } from "@/sections/Integrations"
+import { cn } from "../lib/utils"
+import { IntegrationsType } from "./homepage/integrations"
 
 export default function IntegrationsColumn(props: {
   integrations: IntegrationsType
@@ -26,7 +26,7 @@ export default function IntegrationsColumn(props: {
         repeat: Infinity,
         ease: "linear",
       }}
-      className={twMerge("flex flex-col gap-4 pb-4", className)}
+      className={cn("flex flex-col gap-4 pb-4", className)}
     >
       {Array.from({ length: 2 }).map((_, index) => (
         <React.Fragment key={index}>

@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import View from "@/components/view"
+import View from "@/components/views-badge"
 import { formatDate } from "@/lib/utils"
 import { client } from "@/sanity/lib/client"
 import {
