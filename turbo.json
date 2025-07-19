@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalEnv": [
+    "SANITY_API_READ_TOKEN",
+    "SANITY_API_WRITE_TOKEN",
+    "VERCEL_URL",
+    "VERCEL_PROJECT_PRODUCTION_URL",
+    "VERCEL_ENV",
+    "NODE_ENV"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".sanity/**"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "lint": {
+      "dependsOn": ["transit"]
+    },
+    "format": {
+      "dependsOn": ["transit"]
+    },
+    "format:check": {
+      "dependsOn": ["transit"]
+    },
+    "check-types": {
+      "dependsOn": ["transit"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
