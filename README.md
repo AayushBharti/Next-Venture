@@ -1,143 +1,140 @@
-<div align="center">
-  <!-- <br /> -->
-    <!-- <a href="https://aayushbharti.vercel.app" target="_blank">
-      <img src="https://github.com/user-attachments/assets/471e2baa-8781-43b8-aaed-62e313d03e99" alt="Project Banner">
-    </a> -->
-  <!-- <br /> -->
+# VentureDen
 
-  <div>
-    <img src="https://img.shields.io/badge/-Typescript-black?style=for-the-badge&logoColor=white&logo=react&color=3178C6" alt="typescript" />
-    <img src="https://img.shields.io/badge/-Next_JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=000000" alt="nextdotjs" />
-    <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" />
-    <img src="https://img.shields.io/badge/-Sanity-black?style=for-the-badge&logoColor=white&logo=sanity&color=F03E2F" alt="sanity" />
-  </div>
+A modern, full-stack monorepo built with Next.js App Router, Sanity CMS, Shadcn UI, and TurboRepo.
 
-<h3 align="center">Next ventures - Startup Directory Platform</h3>
+## Features
 
-   <div align="center">
-     A platform where entrepreneurs can submit their startup ideas for virtual pitch competitions, browse other pitches, and gain exposure through a clean minimalistic design for a smooth user experience.
-    </div>
-</div>
+### Monorepo Structure
 
-## 📋 <a name="table">Table of Contents</a>
+- Apps: web (Next.js frontend) and studio (Sanity Studio)
+- Shared packages: UI components, TypeScript config, environment utilities, logger
+- Turborepo for build orchestration and caching
 
-1. 🤖 [Introduction](#introduction)
-2. ⚙️ [Tech Stack](#tech-stack)
-3. 🔋 [Features](#features)
-4. 🤸 [Quick Start](#quick-start)
-<!-- 5. 🚀 [More](#more) -->
+### Frontend (Web)
 
-## 🚨 About
+- Next.js App Router with TypeScript
+- Shadcn UI components with Tailwind CSS
+- Server Components and Server Actions
+- SEO optimization with metadata
+- Blog system with rich text editor
+- Table of contents generation
+- Responsive layouts
 
-This project showcases the latest features of Next.js 15, including Next.js Form
-for seamless client-side form submissions, Unstable After for background tasks,
-Server Component HMR Cache for faster development, and Partial Prerendering for
-performance optimization.
+### Content Management (Studio)
 
-## <a name="introduction">🤖 Introduction</a>
+- Sanity Studio v5
+- Custom document types (Blog, FAQ, Pages)
+- Visual editing integration
+- Structured content with schemas
+- Live preview capabilities
+- Asset management
 
-A Next.js 15 platform where entrepreneurs can submit their startup ideas for
-virtual pitch competitions, browse other pitches, and gain exposure through a
-clean minimalistic design for a smooth user experience.
+## Getting Started
 
-## <a name="tech-stack">⚙️ Tech Stack</a>
+### 1. Install dependencies
 
-- React 19
-- Next.js 15
-- TypeScript
-- Sanity
-- Next-Auth
-- TailwindCSS
-- ShadCN
-- Groq
-- Sentry
-- Markdown
-
-## <a name="features">🔋 Features</a>
-
-👉 **Live Content API**: Displays the latest startup ideas dynamically on the
-homepage using Sanity's Content API.
-
-👉 **GitHub Authentication**: Allows users to log in easily using their GitHub
-account.
-
-👉 **Pitch Submission**: Users can submit startup ideas, including title,
-description, category, and multimedia links ( image or video).
-
-👉 **View Pitches**: Browse through submitted ideas with filtering options by
-category.
-
-👉 **Pitch Details Page**: Click on any pitch to view its details, with
-multimedia and description displayed.
-
-👉 **Profile Page**: Users can view the list of pitches they've submitted.
-
-👉 **Editor Picks**: Admins can highlight top startup ideas using the "Editor
-Picks" feature managed via Sanity Studio.
-
-👉 **Views Counter**: Tracks the number of views for each pitch instead of an
-upvote system.
-
-👉 **Search**: Search functionality to load and view pitches efficiently.
-
-👉 **Minimalistic Design**: Fresh and simple UI with only the essential pages
-for ease of use and a clean aesthetic.
-
-and many more, including the latest **React 19**, **Next.js 15** and **Sanity**
-features alongside code architecture and reusability
-
-## <a name="quick-start">🤸 Quick Start</a>
-
-Follow these steps to set up the project locally on your machine.
-
-**Prerequisites**
-
-Make sure you have the following installed on your machine:
-
-- [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/en)
-- [npm](https://www.npmjs.com/) (Node Package Manager)
-
-**Cloning the Repository**
-
-```bash
-git clone https://github.com/AayushBharti/Next-ventures.git
-cd pitchify
+```shell
+pnpm install
 ```
 
-<!-- **Installation**
+### 2. Run Studio and Next.js app locally
 
-Install the project dependencies using npm:
-
-```bash
-npm install
+```shell
+pnpm run dev
 ```
 
-**Set Up Environment Variables**
+### 3. Open the app and sign in to the Studio
 
-Create a new file named `.env.local` in the root of your project and add the
-following content:
+Open the Next.js app running locally in your browser on [http://localhost:3000](http://localhost:3000).
 
-```env
-NEXT_PUBLIC_SANITY_PROJECT_ID=
-NEXT_PUBLIC_SANITY_DATASET=
-NEXT_PUBLIC_SANITY_API_VERSION='vX'
-SANITY_TOKEN=
+Open the Studio running locally in your browser on [http://localhost:3333](http://localhost:3333). You should now see a screen prompting you to log in to the Studio. Use the same service (Google, GitHub, or email) that you used when you logged in to the CLI.
 
-AUTH_SECRET=
-AUTH_GITHUB_ID=
-AUTH_GITHUB_SECRET=
-``` -->
+### Adding content with Sanity
 
-<!-- Replace the placeholder values with your actual Sanity credentials. You can
-obtain these credentials by signing up & creating a new project on the
-[Sanity website](https://www.sanity.io/).
+#### 1. Publish your first document
 
-**Running the Project**
+The project comes pre-defined with a schema containing `Author`, `Blog`, `BlogIndex`, `FAQ`, `Footer`, `HomePage`, `Navbar`, `Page`, and `Settings` document types.
 
-```bash
-npm run dev
+From the Studio, click "+ Create" and select the `Blog` document type. Go ahead and create and publish the document.
+
+Your content should now appear in your Next.js app ([http://localhost:3000](http://localhost:3000)) as well as in the Studio on the "Presentation" Tab
+
+#### 2. Sample Content
+
+Sample content can be imported after setup. This data includes example blog posts, authors, and other content types to help you get started quickly (see next step).
+
+#### 3. Seed data using script
+
+To add sample data programmatically, run the following command:
+
+```shell
+cd apps/studio
+npx sanity dataset import ./seed-data.tar.gz production --replace
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the
-project. -->
+This command imports seed content into your Sanity dataset.
+
+#### 4. Extending the Sanity schema
+
+The schemas for all document types are defined in the `studio/schemaTypes/documents` directory. You can [add more document types](https://www.sanity.io/docs/schema-types) to the schema to suit your needs.
+
+### Deploying your application and inviting editors
+
+#### 1. Deploy Sanity Studio
+
+Your Next.js frontend (`/web`) and Sanity Studio (`/studio`) are still only running on your local computer. It's time to deploy and get it into the hands of other content editors.
+
+The project includes a GitHub Actions workflow `deploy-sanity.yml` that automatically deploys your Sanity Studio whenever changes are pushed to the `studio` directory.
+
+> **Note**: To use the GitHub Actions workflow, make sure to configure the following secrets in your repository settings:
+>
+> - `SANITY_DEPLOY_TOKEN`
+> - `SANITY_STUDIO_PROJECT_ID`
+> - `SANITY_STUDIO_DATASET`
+> - `SANITY_STUDIO_TITLE`
+> - `SANITY_STUDIO_PRESENTATION_URL`
+> - `SANITY_STUDIO_PRODUCTION_HOSTNAME`
+
+Set `SANITY_STUDIO_PRODUCTION_HOSTNAME` to whatever you want your deployed Sanity Studio hostname to be. Eg. for `SANITY_STUDIO_PRODUCTION_HOSTNAME=venture-den` you'll get a studio URL of `https://venture-den.sanity.studio`.
+
+Set `SANITY_STUDIO_PRESENTATION_URL` to your web app front-end URL (from the Vercel deployment). This URL is required for production deployments and should be:
+
+- Set in your GitHub repository secrets for CI/CD deployments
+- Set in your local environment if deploying manually with `npx sanity deploy`
+- Not needed for local development, where preview will automatically use `http://localhost:3000`
+
+You can then manually deploy from your Studio directory (`/studio`) using:
+
+```shell
+npx sanity deploy
+```
+
+**Note**: To use the live preview feature, your browser needs to enable third party cookies.
+
+#### 2. Deploy Next.js app to Vercel
+
+You have the freedom to deploy your Next.js app to your hosting provider of choice. With Vercel and GitHub being a popular choice, we'll cover the basics of that approach.
+
+1. Create a GitHub repository from this project. [Learn more](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github).
+2. Create a new Vercel project and connect it to your Github repository.
+3. Set the `Root Directory` to your Next.js app (`/apps/web`).
+4. Configure your Environment Variables.
+
+#### 3. Configure CORS Origins
+
+Your production URLs must be added to your Sanity project's CORS origins, otherwise the frontend will be blocked from fetching content.
+
+1. Go to [Sanity Manage](https://www.sanity.io/manage), select your project, and navigate to **API** > **CORS origins**.
+2. Add the following origins:
+   - Your production URL (e.g. `https://your-app.vercel.app`)
+   - Your custom domain if applicable (e.g. `https://yourdomain.com`)
+   - `http://localhost:3000` (for local development — added by default)
+3. Enable **Allow credentials** for each origin that needs authenticated requests (e.g. live preview, visual editing).
+
+> **Note**: Vercel preview deployments use unique URLs per commit. If you need CORS access on preview deployments, add a wildcard origin like `https://*-your-project.vercel.app` or add specific preview URLs as needed.
+
+#### 4. Invite a collaborator
+
+Now that you've deployed your Next.js application and Sanity Studio, you can optionally invite a collaborator to your Studio. Open up [Manage](https://www.sanity.io/manage), select your project and click "Invite project members"
+
+They will be able to access the deployed Studio, where you can collaborate together on creating content.
