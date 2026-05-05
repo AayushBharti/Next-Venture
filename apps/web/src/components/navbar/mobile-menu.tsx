@@ -21,9 +21,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 import type { ColumnLink, NavigationData } from "@/types";
-import { MenuLink } from "./elements/menu-link";
-import { SanityButtons } from "./elements/sanity-buttons";
-import { Logo } from "./logo";
+import { MenuLink } from "../elements/menu-link";
+import { SanityButtons } from "../elements/sanity-buttons";
+import { Logo } from "../logo";
 
 export function MobileMenu({ navbarData, settingsData }: NavigationData) {
   const [isOpen, setIsOpen] = useState(false);
