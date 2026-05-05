@@ -32,7 +32,7 @@ export function NavbarAuth() {
         size="sm"
         variant="outline"
         onClick={() => setShowModal(true)}
-        className="rounded-lg border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-white/5 text-xs text-neutral-500 dark:text-white/70 hover:border-pink-500/30 hover:bg-pink-500/10 hover:text-pink-300"
+        className="h-8 rounded-lg text-xs"
       >
         Sign In
       </Button>

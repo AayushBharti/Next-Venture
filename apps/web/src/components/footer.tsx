@@ -29,7 +29,7 @@ export async function FooterServer() {
       <div className="container mx-auto">
         <RichText
           richText={data.richText}
-          className="prose-sm dark:prose-invert max-w-none text-center prose-p:my-0 prose-p:text-neutral-400 dark:prose-p:text-white/40"
+          className="prose-sm dark:prose-invert max-w-none text-center prose-p:my-0 prose-p:text-neutral-400 dark:prose-p:text-white/40 prose-p:text-sm"
         />
       </div>
     </footer>
