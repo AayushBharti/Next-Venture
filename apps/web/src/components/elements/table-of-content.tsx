@@ -1,15 +1,23 @@
 "use client";
+
 import { cn } from "@workspace/ui/lib/utils";
-import { ChevronDown, Circle } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { type FC, useCallback, useMemo } from "react";
-import slugify from "slugify";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import type { SanityRichTextBlock, SanityRichTextProps } from "@/types";
+import { convertToSlug } from "@/utils";
 
-// ============================================================================
-// TYPES & INTERFACES
-// ============================================================================
+// ==========================================================================
+// TYPES
+// ==========================================================================
 
 type TableOfContentProps = {
   richText?: SanityRichTextProps;
@@ -20,24 +28,11 @@ type TableOfContentProps = {
 type ProcessedHeading = {
   readonly id: string;
   readonly text: string;
+  readonly slug: string;
   readonly href: string;
   readonly level: number;
   readonly style: HeadingStyle;
-  readonly children: ProcessedHeading[];
-  readonly isChild: boolean;
   readonly _key?: string;
-};
-
-type AnchorProps = {
-  readonly heading: ProcessedHeading;
-  readonly maxDepth?: number;
-  readonly currentDepth?: number;
-};
-
-type TableOfContentState = {
-  readonly shouldShow: boolean;
-  readonly headings: ProcessedHeading[];
-  readonly error?: string;
 };
 
 type HeadingStyle = "h2" | "h3" | "h4" | "h5" | "h6";
@@ -54,9 +49,9 @@ type HeadingBlock = Extract<SanityRichTextBlock, { _type: "block" }> & {
   children: readonly SanityTextChild[];
 };
 
-// ============================================================================
+// ==========================================================================
 // CONSTANTS
-// ============================================================================
+// ==========================================================================
 
 const HEADING_LEVELS: Record<HeadingStyle, number> = {
   h2: 2,
@@ -66,29 +61,22 @@ const HEADING_LEVELS: Record<HeadingStyle, number> = {
   h6: 6,
 } as const;
 
-const HEADING_STYLES: Record<HeadingStyle, string> = {
-  h2: "pl-0",
-  h3: "pl-4",
-  h4: "pl-8",
-  h5: "pl-12",
-  h6: "pl-16",
-} as const;
-
-const SLUGIFY_OPTIONS = {
-  lower: true,
-  strict: true,
-  remove: /[*+~.()'"!:@]/g,
-} as const;
-
 const DEFAULT_MAX_DEPTH = 6;
 const MIN_HEADINGS_TO_SHOW = 1;
 
-// ============================================================================
-// TYPE GUARDS & VALIDATORS
-// ============================================================================
+const SPRING_TRANSITION = {
+  type: "spring" as const,
+  stiffness: 350,
+  damping: 30,
+  mass: 0.8,
+};
+
+// ==========================================================================
+// TYPE GUARDS
+// ==========================================================================
 
 function isValidHeadingStyle(style: unknown): style is HeadingStyle {
-  return typeof style === "string" && style in HEADING_STYLES;
+  return typeof style === "string" && style in HEADING_LEVELS;
 }
 
 function isValidTextChild(child: unknown): child is SanityTextChild {
@@ -99,16 +87,6 @@ function isValidTextChild(child: unknown): child is SanityTextChild {
     child._type === "span" &&
     "text" in child &&
     typeof child.text === "string"
-  );
-}
-
-function hasValidTextChildren(
-  children: unknown
-): children is readonly SanityTextChild[] {
-  return (
-    Array.isArray(children) &&
-    children.length > 0 &&
-    children.every(isValidTextChild)
   );
 }
 
@@ -126,366 +104,235 @@ function isHeadingBlock(block: unknown): block is HeadingBlock {
 
   return (
     isValidHeadingStyle(candidate.style) &&
-    hasValidTextChildren(candidate.children)
+    Array.isArray(candidate.children) &&
+    candidate.children.length > 0 &&
+    candidate.children.every(isValidTextChild)
   );
 }
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
+// ==========================================================================
+// PROCESSING
+// ==========================================================================
 
-function createSlug(text: string): string {
-  if (!text?.trim()) {
-    return "";
-  }
-
-  try {
-    return slugify(text.trim(), SLUGIFY_OPTIONS);
-  } catch (_error) {
-    return text
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, "");
-  }
+/** Uses the same slug logic as rich-text.tsx (parseChildrenToSlug -> convertToSlug). */
+function childrenToSlug(children: readonly SanityTextChild[]): string {
+  const raw = children.map((child) => child.text ?? "").join("");
+  return convertToSlug(raw) ?? "";
 }
 
-function extractTextFromChildren(children: readonly SanityTextChild[]): string {
-  try {
-    return children
-      .map((child) => child.text?.trim() ?? "")
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-  } catch (_error) {
-    return "";
-  }
+function extractText(children: readonly SanityTextChild[]): string {
+  return children
+    .map((child) => child.text ?? "")
+    .join("")
+    .trim();
 }
 
-function generateUniqueId(text: string, index: number, _key?: string): string {
-  const baseId = _key || createSlug(text) || `heading-${index}`;
-  return `toc-${baseId}`;
+function processHeadings(
+  richText: SanityRichTextProps,
+  maxDepth: number,
+): ProcessedHeading[] {
+  if (!Array.isArray(richText) || richText.length === 0) return [];
+
+  const headingBlocks = richText.filter(isHeadingBlock);
+
+  return headingBlocks
+    .map((block, index): ProcessedHeading | null => {
+      const text = extractText(block.children);
+      if (!text) return null;
+      const level = HEADING_LEVELS[block.style];
+      if (level > maxDepth) return null;
+
+      const slug = childrenToSlug(block.children);
+      if (!slug) return null;
+
+      return {
+        id: `toc-${block._key || slug || `heading-${index}`}`,
+        text,
+        slug,
+        href: `#${slug}`,
+        level,
+        style: block.style,
+        _key: block._key,
+      };
+    })
+    .filter((h): h is ProcessedHeading => h !== null);
 }
 
-// ============================================================================
-// CORE BUSINESS LOGIC
-// ============================================================================
+// ==========================================================================
+// HOOKS
+// ==========================================================================
 
-function extractHeadingBlocks(richText: SanityRichTextProps): HeadingBlock[] {
-  if (!(richText && Array.isArray(richText))) {
-    return [];
-  }
+/**
+ * Section-aware scroll spy.
+ * Each heading "owns" the region from itself to the next heading.
+ * A heading is active when its section overlaps the viewport.
+ */
+function useActiveSections(headings: ProcessedHeading[]) {
+  const [activeSlugs, setActiveSlugs] = useState<Set<string>>(new Set());
 
-  try {
-    return richText.filter(isHeadingBlock);
-  } catch (_error) {
-    return [];
-  }
-}
+  useEffect(() => {
+    if (headings.length === 0) return;
 
-function createProcessedHeading(
-  block: HeadingBlock,
-  index: number
-): ProcessedHeading | null {
-  try {
-    const text = extractTextFromChildren(block.children);
+    const slugs = headings.map((h) => h.slug);
+    let rafId = 0;
 
-    if (!text) {
-      return null;
+    function update() {
+      const active = new Set<string>();
+      const vh = window.innerHeight;
+
+      for (let i = 0; i < slugs.length; i++) {
+        const el = document.getElementById(slugs[i]!);
+        if (!el) continue;
+
+        // Section top = this heading's top
+        const sectionTop = el.getBoundingClientRect().top;
+
+        // Section bottom = next heading's top, or viewport bottom + buffer for last
+        let sectionBottom: number;
+        if (i + 1 < slugs.length) {
+          const nextEl = document.getElementById(slugs[i + 1]!);
+          sectionBottom = nextEl
+            ? nextEl.getBoundingClientRect().top
+            : sectionTop + vh;
+        } else {
+          // Last heading: section extends to end of document
+          sectionBottom = Math.max(
+            document.documentElement.scrollHeight -
+              window.scrollY -
+              el.offsetTop +
+              sectionTop,
+            sectionTop + vh,
+          );
+        }
+
+        // Section overlaps viewport if it starts before viewport bottom
+        // and ends after viewport top
+        if (sectionTop < vh && sectionBottom > 0) {
+          active.add(slugs[i]!);
+        }
+      }
+
+      setActiveSlugs(active);
     }
 
-    const level = HEADING_LEVELS[block.style];
-    const href = `#${createSlug(text)}`;
-    const id = generateUniqueId(text, index, block._key);
+    function onScroll() {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(update);
+    }
 
-    return {
-      id,
-      text,
-      href,
-      level,
-      style: block.style,
-      children: [],
-      isChild: false,
-      _key: block._key,
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
     };
-  } catch (_error) {
-    return null;
-  }
+  }, [headings]);
+
+  return activeSlugs;
 }
 
-function buildHeadingHierarchy(
-  flatHeadings: ProcessedHeading[],
-  maxDepth: number = DEFAULT_MAX_DEPTH
-): ProcessedHeading[] {
-  if (flatHeadings.length === 0) {
-    return [];
-  }
-
-  try {
-    const result: ProcessedHeading[] = [];
-    const processed = new Set<number>();
-
-    flatHeadings.forEach((heading, index) => {
-      if (processed.has(index) || heading.level > maxDepth) {
-        return;
-      }
-
-      const children = collectChildHeadings(
-        flatHeadings,
-        index,
-        processed,
-        maxDepth
-      );
-
-      result.push({
-        ...heading,
-        children,
-      });
-    });
-
-    return result;
-  } catch (_error) {
-    return flatHeadings.map((heading) => ({
-      ...heading,
-      children: [],
-    }));
-  }
-}
-
-function collectChildHeadings(
-  headings: ProcessedHeading[],
-  parentIndex: number,
-  processed: Set<number>,
-  maxDepth: number
-): ProcessedHeading[] {
-  const parentHeading = headings[parentIndex];
-
-  if (!parentHeading || parentHeading.level >= maxDepth) {
-    return [];
-  }
-
-  const children: ProcessedHeading[] = [];
-  const parentLevel = parentHeading.level;
-
-  for (let i = parentIndex + 1; i < headings.length; i++) {
-    const currentHeading = headings[i];
-
-    if (!currentHeading || currentHeading.level <= parentLevel) {
-      break;
-    }
-
-    if (processed.has(i) || currentHeading.level > maxDepth) {
-      continue;
-    }
-
-    processed.add(i);
-
-    const nestedChildren = collectChildHeadings(
-      headings,
-      i,
-      processed,
-      maxDepth
-    );
-
-    children.push({
-      ...currentHeading,
-      children: nestedChildren,
-      isChild: true,
-    });
-  }
-
-  return children;
-}
-
-function processHeadingBlocks(
-  headingBlocks: HeadingBlock[],
-  maxDepth: number = DEFAULT_MAX_DEPTH
-): ProcessedHeading[] {
-  if (!Array.isArray(headingBlocks) || headingBlocks.length === 0) {
-    return [];
-  }
-
-  try {
-    const processedHeadings = headingBlocks
-      .map(createProcessedHeading)
-      .filter((heading): heading is ProcessedHeading => heading !== null);
-
-    return buildHeadingHierarchy(processedHeadings, maxDepth);
-  } catch (_error) {
-    return [];
-  }
-}
-
-// ============================================================================
-// CUSTOM HOOKS
-// ============================================================================
-
-function useTableOfContentState(
-  richText?: SanityRichTextProps,
-  maxDepth: number = DEFAULT_MAX_DEPTH
-): TableOfContentState {
-  return useMemo(() => {
-    try {
-      if (!(richText && Array.isArray(richText)) || richText.length === 0) {
-        return {
-          shouldShow: false,
-          headings: [],
-        };
-      }
-
-      const headingBlocks = extractHeadingBlocks(richText);
-
-      if (headingBlocks.length < MIN_HEADINGS_TO_SHOW) {
-        return {
-          shouldShow: false,
-          headings: [],
-        };
-      }
-
-      const processedHeadings = processHeadingBlocks(headingBlocks, maxDepth);
-
-      return {
-        shouldShow: processedHeadings.length >= MIN_HEADINGS_TO_SHOW,
-        headings: processedHeadings,
-      };
-    } catch (error) {
-      return {
-        shouldShow: false,
-        headings: [],
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
-  }, [richText, maxDepth]);
-}
-
-// ============================================================================
-// COMPONENTS
-// ============================================================================
-
-const TableOfContentAnchor: FC<AnchorProps> = ({
-  heading,
-  maxDepth = DEFAULT_MAX_DEPTH,
-  currentDepth = 1,
-}) => {
-  const { href, text, children, isChild, id } = heading;
-
-  const shouldRenderChildren = useCallback(
-    () =>
-      Array.isArray(children) && children.length > 0 && currentDepth < maxDepth,
-    [children, currentDepth, maxDepth]
-  );
-
-  if (currentDepth > maxDepth) {
-    return null;
-  }
-
-  if (!(text?.trim() && href?.trim())) {
-    return null;
-  }
-
-  const hasChildren = shouldRenderChildren();
-
-  return (
-    <li
-      className={cn(
-        "my-2 list-inside transition-all duration-200",
-        isChild && "ml-1.5"
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <Circle
-          aria-hidden="true"
-          className={cn(
-            "size-1.5 min-h-1.5 min-w-1.5 transition-colors duration-200",
-            isChild ? "fill-neutral-300 dark:fill-white/30" : "fill-pink-400"
-          )}
-        />
-        <Link
-          aria-describedby={`${id}-level`}
-          className={cn(
-            "line-clamp-1 text-neutral-500 transition-colors duration-200 dark:text-white/50",
-            "hover:text-pink-400 focus:outline-none",
-            "rounded-sm px-1 py-0.5"
-          )}
-          href={href}
-        >
-          {text}
-        </Link>
-        <span className="sr-only" id={`${id}-level`}>
-          Heading level {heading.level}
-        </span>
-      </div>
-
-      {hasChildren && (
-        <ul className="mt-1">
-          {children.map((child, index) => (
-            <TableOfContentAnchor
-              currentDepth={currentDepth + 1}
-              heading={child}
-              key={child.id || `${child.text}-${index}-${currentDepth}`}
-              maxDepth={maxDepth}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-};
+// ==========================================================================
+// COMPONENT
+// ==========================================================================
 
 export const TableOfContent: FC<TableOfContentProps> = ({
   richText,
   className,
   maxDepth = DEFAULT_MAX_DEPTH,
 }) => {
-  const { shouldShow, headings, error } = useTableOfContentState(
-    richText,
-    maxDepth
+  const headings = useMemo(
+    () => (richText ? processHeadings(richText, maxDepth) : []),
+    [richText, maxDepth],
   );
 
-  if (error) {
-    return null;
-  }
+  const activeSlugs = useActiveSections(headings);
+  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
-  if (!shouldShow || headings.length === 0) {
-    return null;
-  }
+  const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+
+  const setItemRef = useCallback(
+    (slug: string) => (el: HTMLLIElement | null) => {
+      if (el) {
+        itemRefs.current.set(slug, el);
+      } else {
+        itemRefs.current.delete(slug);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (activeSlugs.size === 0) {
+      setIndicator({ top: 0, height: 0 });
+      return;
+    }
+
+    let minTop = Infinity;
+    let maxBottom = -Infinity;
+
+    for (const slug of activeSlugs) {
+      const el = itemRefs.current.get(slug);
+      if (!el) continue;
+      minTop = Math.min(minTop, el.offsetTop);
+      maxBottom = Math.max(maxBottom, el.offsetTop + el.offsetHeight);
+    }
+
+    if (minTop === Infinity) return;
+    setIndicator({ top: minTop, height: maxBottom - minTop });
+  }, [activeSlugs]);
+
+  if (headings.length < MIN_HEADINGS_TO_SHOW) return null;
 
   return (
-    <aside
-      aria-labelledby="toc-heading"
-      className={cn(
-        "flex w-full flex-col rounded-2xl border border-neutral-200 bg-white/50 p-5 dark:border-white/10 dark:bg-neutral-900/50",
-        className
-      )}
+    <nav
+      aria-label="Table of contents"
+      className={cn("flex flex-col gap-4", className)}
     >
-      <details className="group" open>
-        <summary
-          className={cn(
-            "flex cursor-pointer items-center justify-between",
-            "text-xs font-semibold uppercase tracking-widest text-neutral-300 dark:text-white/30",
-            "transition-colors duration-200 focus:outline-none"
-          )}
-          id="toc-heading"
-        >
-          <span>On This Page</span>
-          <ChevronDown
-            aria-hidden="true"
-            className="size-4 transform transition-transform duration-200 group-open:rotate-180"
-          />
-        </summary>
+      <p className="text-sm font-medium text-foreground">In this Article</p>
 
-        <nav aria-labelledby="toc-heading">
-          <ul className="mt-4 space-y-1 text-sm">
-            {headings.map((heading, index) => (
-              <TableOfContentAnchor
-                currentDepth={1}
-                heading={heading}
-                key={heading.id || `${heading.text}-${index}`}
-                maxDepth={maxDepth}
-              />
-            ))}
-          </ul>
-        </nav>
-      </details>
-    </aside>
+      <div className="relative border-l border-border">
+        {/* Animated indicator */}
+        <motion.div
+          animate={{
+            top: indicator.top,
+            height: indicator.height,
+            opacity: activeSlugs.size > 0 ? 1 : 0,
+          }}
+          className="absolute -left-px w-[2px] bg-pink-500"
+          initial={false}
+          transition={SPRING_TRANSITION}
+        />
+
+        <ul className="flex flex-col">
+          {headings.map((heading) => {
+            const isActive = activeSlugs.has(heading.slug);
+
+            return (
+              <li key={heading.id} ref={setItemRef(heading.slug)}>
+                <Link
+                  className={cn(
+                    "block px-6 py-1.5 text-sm leading-snug transition-colors duration-200",
+                    isActive
+                      ? "font-medium text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  href={heading.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const target = document.getElementById(heading.slug);
+                    if (target) {
+                      target.scrollIntoView({ behavior: "smooth" });
+                      window.history.pushState(null, "", heading.href);
+                    }
+                  }}
+                >
+                  {heading.text}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </nav>
   );
 };
