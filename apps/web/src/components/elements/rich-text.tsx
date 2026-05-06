@@ -15,7 +15,7 @@ const components: Partial<PortableTextReactComponents> = {
       const slug = parseChildrenToSlug(value.children);
       return (
         <h2
-          className="scroll-m-20 border-b pb-2 font-semibold text-3xl first:mt-0"
+          className="scroll-m-20 border-b pb-2 font-semibold text-xl sm:text-2xl md:text-3xl first:mt-0"
           id={slug}
         >
           {children}
@@ -25,7 +25,10 @@ const components: Partial<PortableTextReactComponents> = {
     h3: ({ children, value }) => {
       const slug = parseChildrenToSlug(value.children);
       return (
-        <h3 className="scroll-m-20 font-semibold text-2xl" id={slug}>
+        <h3
+          className="scroll-m-20 font-semibold text-lg sm:text-xl md:text-2xl"
+          id={slug}
+        >
           {children}
         </h3>
       );
@@ -33,7 +36,10 @@ const components: Partial<PortableTextReactComponents> = {
     h4: ({ children, value }) => {
       const slug = parseChildrenToSlug(value.children);
       return (
-        <h4 className="scroll-m-20 font-semibold text-xl" id={slug}>
+        <h4
+          className="scroll-m-20 font-semibold text-base sm:text-lg md:text-xl"
+          id={slug}
+        >
           {children}
         </h4>
       );
@@ -41,7 +47,10 @@ const components: Partial<PortableTextReactComponents> = {
     h5: ({ children, value }) => {
       const slug = parseChildrenToSlug(value.children);
       return (
-        <h5 className="scroll-m-20 font-semibold text-lg" id={slug}>
+        <h5
+          className="scroll-m-20 font-semibold text-base md:text-lg"
+          id={slug}
+        >
           {children}
         </h5>
       );
@@ -49,7 +58,7 @@ const components: Partial<PortableTextReactComponents> = {
     h6: ({ children, value }) => {
       const slug = parseChildrenToSlug(value.children);
       return (
-        <h6 className="scroll-m-20 font-semibold text-base" id={slug}>
+        <h6 className="scroll-m-20 font-semibold text-sm md:text-base" id={slug}>
           {children}
         </h6>
       );
@@ -121,7 +130,7 @@ export function RichText<T extends SanityRichTextProps>({
   return (
     <div
       className={cn(
-        "prose prose-zinc dark:prose-invert max-w-none prose-headings:scroll-m-24 prose-h2:border-b prose-h2:pb-2 prose-h2:font-semibold prose-h2:text-3xl prose-headings:text-opacity-90 prose-ol:text-opacity-80 prose-p:text-opacity-80 prose-ul:text-opacity-80 prose-h2:first:mt-0",
+        "prose prose-base md:prose-lg prose-zinc dark:prose-invert max-w-none prose-headings:scroll-m-24 prose-h2:border-b prose-h2:pb-2 prose-h2:font-semibold prose-h2:text-xl prose-h2:sm:text-2xl prose-h2:md:text-3xl prose-headings:text-opacity-90 prose-ol:text-opacity-80 prose-p:text-opacity-80 prose-ul:text-opacity-80 prose-h2:first:mt-0",
         className
       )}
     >

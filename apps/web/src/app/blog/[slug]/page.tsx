@@ -98,34 +98,20 @@ export default async function BlogSlugPage({
       <ArticleJsonLd article={data} />
 
       <div className="mx-auto max-w-6xl px-6 pt-28">
-        <div className="flex gap-10 lg:gap-16">
-          {/* Left sidebar — ToC (sticky) */}
-          <aside className="hidden w-56 shrink-0 lg:block">
-            <div className="sticky top-28">
-              <Link
-                href="/blog"
-                className="mb-8 inline-flex items-center gap-1.5 text-sm text-neutral-400 transition hover:text-pink-400 dark:text-white/40"
-              >
-                <ArrowLeft className="size-3.5" />
-                Back to Blog
-              </Link>
-              <TableOfContent richText={richText ?? []} />
-            </div>
-          </aside>
+        {/* Back link */}
+        <Link
+          href="/blog"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-pink-400"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to Blog
+        </Link>
 
+        <div className="flex gap-10 lg:gap-16">
           {/* Main content column */}
           <div className="min-w-0 flex-1">
-            {/* Mobile back link */}
-            <Link
-              href="/blog"
-              className="mb-6 inline-flex items-center gap-1.5 text-sm text-neutral-400 transition hover:text-pink-400 dark:text-white/40 lg:hidden"
-            >
-              <ArrowLeft className="size-3.5" />
-              Back to Blog
-            </Link>
-
             {/* Date */}
-            <div className="flex items-center gap-4 text-sm text-neutral-400 dark:text-white/40">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               {formattedDate && (
                 <time dateTime={publishedAt ?? ""}>{formattedDate}</time>
               )}
@@ -133,7 +119,7 @@ export default async function BlogSlugPage({
                 <Clock className="size-3.5" />
                 {Math.max(
                   3,
-                  Math.ceil((description ?? "").split(/\s+/).length / 40)
+                  Math.ceil((description ?? "").split(/\s+/).length / 40),
                 )}{" "}
                 min read
               </span>
@@ -146,7 +132,7 @@ export default async function BlogSlugPage({
 
             {/* Description */}
             {description && (
-              <p className="mt-5 text-base leading-relaxed text-neutral-500 sm:text-lg dark:text-white/50">
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {description}
               </p>
             )}
@@ -164,16 +150,23 @@ export default async function BlogSlugPage({
             )}
 
             {/* Divider */}
-            <div className="mt-10 h-px bg-neutral-200 dark:bg-white/10" />
+            <div className="mt-10 h-px bg-border" />
 
             {/* Article body */}
             <article className="mt-10">
               <RichText
                 richText={richText}
-                className="prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-none prose-h3:text-xl prose-h3:mt-8 prose-p:text-neutral-600 prose-p:leading-relaxed dark:prose-p:text-white/60 prose-a:text-pink-500 dark:prose-a:text-pink-400 prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-800 dark:prose-strong:text-white/80 prose-blockquote:border-l-pink-500/40 prose-blockquote:text-neutral-500 dark:prose-blockquote:text-white/45 prose-blockquote:not-italic prose-code:text-pink-600 dark:prose-code:text-pink-300 prose-code:bg-neutral-100 dark:prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-li:text-neutral-600 dark:prose-li:text-white/60 prose-li:marker:text-pink-400/60 prose-hr:border-neutral-200 dark:prose-hr:border-white/10"
+                className="prose prose-base md:prose-lg dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-xl prose-h2:sm:text-2xl prose-h2:mt-8 prose-h2:md:mt-10 prose-h2:mb-3 prose-h2:md:mb-4 prose-h2:border-none prose-h3:text-lg prose-h3:sm:text-xl prose-h3:mt-6 prose-h3:md:mt-8 prose-p:text-neutral-600 prose-p:leading-relaxed dark:prose-p:text-white/60 prose-a:text-pink-500 dark:prose-a:text-pink-400 prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-800 dark:prose-strong:text-white/80 prose-blockquote:border-l-pink-500/40 prose-blockquote:text-neutral-500 dark:prose-blockquote:text-white/45 prose-blockquote:not-italic prose-code:text-pink-600 dark:prose-code:text-pink-300 prose-code:bg-neutral-100 dark:prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-li:text-neutral-600 dark:prose-li:text-white/60 prose-li:marker:text-pink-400/60 prose-hr:border-neutral-200 dark:prose-hr:border-white/10"
               />
             </article>
           </div>
+
+          {/* Right sidebar — ToC (sticky) */}
+          <aside className="hidden w-56 shrink-0 lg:block">
+            <div className="sticky top-28">
+              <TableOfContent richText={richText ?? []} />
+            </div>
+          </aside>
         </div>
       </div>
     </main>
