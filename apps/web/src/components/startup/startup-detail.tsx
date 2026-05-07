@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { SanityImage } from "@/components/elements/sanity-image";
 import { AiAnalysisPanel } from "./ai-analysis-panel";
+import { MarkdownToc } from "./markdown-toc";
 import { ShareButton } from "./share-button";
 import { UpvoteButton } from "./upvote-button";
 
@@ -13,6 +14,49 @@ const md = markdownit({
   linkify: true,
   typographer: true,
 });
+
+// Inject IDs into heading tags so the ToC can link to them.
+const defaultHeadingOpen =
+  md.renderer.rules.heading_open ||
+  ((tokens, idx, options, _env, self) =>
+    self.renderToken(tokens, idx, options));
+
+md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
+  const token = tokens[idx];
+  if (!token) return defaultHeadingOpen(tokens, idx, options, env, self);
+  const next = tokens[idx + 1];
+  const text =
+    next?.children?.map((t) => t.content).join("") || next?.content || "";
+  const slug = text
+    .toLowerCase()
+    .replace(/[^\w]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  token.attrSet("id", slug);
+  return defaultHeadingOpen(tokens, idx, options, env, self);
+};
+
+type MarkdownHeading = { text: string; slug: string; level: number };
+
+/** Extract h2/h3 headings from a raw markdown string. */
+function extractMarkdownHeadings(markdown: string): MarkdownHeading[] {
+  const regex = /^(#{2,3})\s+(.+)$/gm;
+  const headings: MarkdownHeading[] = [];
+  let match = regex.exec(markdown);
+  while (match) {
+    const level = match[1];
+    const rawText = match[2];
+    if (level && rawText) {
+      const text = rawText.trim();
+      const slug = text
+        .toLowerCase()
+        .replace(/[^\w]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      headings.push({ text, slug, level: level.length });
+    }
+    match = regex.exec(markdown);
+  }
+  return headings;
+}
 
 type Startup = NonNullable<QueryStartupByIdResult>;
 type Author = NonNullable<Startup["author"]>;
@@ -25,7 +69,7 @@ type Props = {
 // ── Prose class string (extracted to keep JSX readable) ──
 
 const PROSE_CLASSES =
-  "prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h2:mt-14 prose-h2:mb-5 prose-h2:text-2xl prose-h3:mt-10 prose-h3:mb-4 prose-p:leading-relaxed prose-p:text-neutral-600 dark:prose-p:text-white/65 prose-a:text-pink-500 prose-a:underline prose-a:decoration-pink-500/30 prose-a:underline-offset-2 hover:prose-a:decoration-pink-500 prose-strong:text-neutral-800 dark:prose-strong:text-white prose-ul:text-neutral-600 dark:prose-ul:text-white/65 prose-ol:text-neutral-600 dark:prose-ol:text-white/65 prose-li:marker:text-pink-400/50 prose-code:rounded-md prose-code:bg-neutral-100 dark:prose-code:bg-white/8 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-pink-500 dark:prose-code:text-pink-400 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-xl prose-pre:border prose-pre:border-neutral-200 dark:prose-pre:border-white/10 prose-pre:bg-neutral-50 dark:prose-pre:bg-neutral-900 prose-blockquote:not-italic prose-blockquote:border-l-2 prose-blockquote:border-pink-500/50 prose-blockquote:pl-5 prose-blockquote:text-neutral-500 dark:prose-blockquote:text-white/50 prose-hr:border-neutral-200 dark:prose-hr:border-white/10 prose-img:rounded-xl";
+  "prose prose-base md:prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h2:mt-8 prose-h2:md:mt-14 prose-h2:mb-3 prose-h2:md:mb-5 prose-h2:text-xl prose-h2:sm:text-2xl prose-h3:mt-6 prose-h3:md:mt-10 prose-h3:mb-3 prose-h3:md:mb-4 prose-h3:text-lg prose-h3:sm:text-xl prose-p:leading-relaxed prose-p:text-neutral-600 dark:prose-p:text-white/65 prose-a:text-pink-500 prose-a:underline prose-a:decoration-pink-500/30 prose-a:underline-offset-2 hover:prose-a:decoration-pink-500 prose-strong:text-neutral-800 dark:prose-strong:text-white prose-ul:text-neutral-600 dark:prose-ul:text-white/65 prose-ol:text-neutral-600 dark:prose-ol:text-white/65 prose-li:marker:text-pink-400/50 prose-code:rounded-md prose-code:bg-neutral-100 dark:prose-code:bg-white/8 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-pink-500 dark:prose-code:text-pink-400 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-xl prose-pre:border prose-pre:border-neutral-200 dark:prose-pre:border-white/10 prose-pre:bg-neutral-50 dark:prose-pre:bg-neutral-900 prose-blockquote:not-italic prose-blockquote:border-l-2 prose-blockquote:border-pink-500/50 prose-blockquote:pl-5 prose-blockquote:text-neutral-500 dark:prose-blockquote:text-white/50 prose-hr:border-neutral-200 dark:prose-hr:border-white/10 prose-img:rounded-xl";
 
 // ── Sub-components ──
 
@@ -74,48 +118,53 @@ function AuthorChip({ author }: { author: Author }) {
   );
 }
 
-/** Sticky sidebar card for the pitch author. */
-function AuthorSidebar({ author }: { author: Author }) {
+/** Author card content (without wrapper). Used inside the sticky sidebar. */
+function AuthorSidebarContent({ author }: { author: Author }) {
   return (
-    <aside className="lg:w-72 lg:shrink-0">
-      <div className="sticky top-28 overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-white/10">
-        {/* Gradient accent bar */}
-        <div className="h-1 bg-gradient-to-r from-pink-500 via-orange-400 to-pink-500" />
+    <div className="overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-white/10">
+      <div className="h-1 bg-gradient-to-r from-pink-500 via-orange-400 to-pink-500" />
+      <div className="bg-gradient-to-b from-neutral-50/80 to-white p-6 dark:from-white/[0.04] dark:to-transparent">
+        <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-white/25">
+          Pitched by
+        </p>
 
-        <div className="bg-gradient-to-b from-neutral-50/80 to-white p-6 dark:from-white/[0.04] dark:to-transparent">
-          <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-white/25">
-            Pitched by
+        <Link href={`/user/${author._id}`} className="group block">
+          <div className="mb-4 w-fit rounded-full ring-2 ring-neutral-200 transition group-hover:ring-pink-400/50 dark:ring-white/10 dark:group-hover:ring-pink-500/40">
+            <AuthorAvatar author={author} size="lg" />
+          </div>
+
+          <p className="text-base font-semibold text-neutral-900 transition group-hover:text-pink-500 dark:text-white">
+            {author.name}
           </p>
-
-          <Link href={`/user/${author._id}`} className="group block">
-            <div className="mb-4 ring-2 ring-neutral-200 transition group-hover:ring-pink-400/50 dark:ring-white/10 dark:group-hover:ring-pink-500/40 rounded-full w-fit">
-              <AuthorAvatar author={author} size="lg" />
-            </div>
-
-            <p className="text-base font-semibold text-neutral-900 transition group-hover:text-pink-500 dark:text-white">
-              {author.name}
-            </p>
-            {author.username && (
-              <p className="mt-0.5 text-sm text-neutral-400 dark:text-white/35">
-                @{author.username}
-              </p>
-            )}
-          </Link>
-
-          {author.bio && (
-            <p className="mt-3 text-sm leading-relaxed text-neutral-500 dark:text-white/45">
-              {author.bio}
+          {author.username && (
+            <p className="mt-0.5 text-sm text-neutral-400 dark:text-white/35">
+              @{author.username}
             </p>
           )}
+        </Link>
 
-          <Link
-            href={`/user/${author._id}`}
-            className="mt-5 inline-flex text-sm font-medium text-pink-500 transition hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300"
-          >
-            View all pitches &rarr;
-          </Link>
-        </div>
+        {author.bio && (
+          <p className="mt-3 text-sm leading-relaxed text-neutral-500 dark:text-white/45">
+            {author.bio}
+          </p>
+        )}
+
+        <Link
+          href={`/user/${author._id}`}
+          className="mt-5 inline-flex text-sm font-medium text-pink-500 transition hover:text-pink-600 dark:text-pink-400 dark:hover:text-pink-300"
+        >
+          View all pitches &rarr;
+        </Link>
       </div>
+    </div>
+  );
+}
+
+/** Full author sidebar with wrapper — used on mobile. */
+function AuthorSidebar({ author }: { author: Author }) {
+  return (
+    <aside className="w-full">
+      <AuthorSidebarContent author={author} />
     </aside>
   );
 }
@@ -177,6 +226,7 @@ export function StartupDetail({ startup, children }: Props) {
   });
 
   const parsedPitch = pitch ? md.render(pitch) : "";
+  const pitchHeadings = pitch ? extractMarkdownHeadings(pitch) : [];
 
   const wordCount = pitch ? pitch.split(/\s+/).length : 0;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
@@ -184,9 +234,9 @@ export function StartupDetail({ startup, children }: Props) {
   return (
     <article>
       {/* ── Contained Hero ── */}
-      <section className="container px-6 pt-6 md:px-10">
+      <section className="container px-6 pt-20 md:px-10">
         <div className="relative overflow-hidden rounded-2xl md:rounded-3xl">
-          <div className="relative aspect-video w-full">
+          <div className="relative h-auto max-h-150 w-full">
             <SanityImage
               image={image}
               className="size-full object-cover"
@@ -274,7 +324,21 @@ export function StartupDetail({ startup, children }: Props) {
             {children}
           </div>
 
-          {author && <AuthorSidebar author={author} />}
+          {/* Right sidebar — ToC + Author */}
+          <div className="hidden lg:flex lg:w-72 lg:shrink-0 lg:flex-col lg:gap-8">
+            <div className="sticky top-28 flex flex-col gap-8">
+              {pitchHeadings.length > 0 && (
+                <MarkdownToc headings={pitchHeadings} />
+              )}
+              {author && <AuthorSidebarContent author={author} />}
+            </div>
+          </div>
+          {/* Mobile: author sidebar below content */}
+          {author && (
+            <div className="lg:hidden">
+              <AuthorSidebar author={author} />
+            </div>
+          )}
         </div>
       </section>
     </article>

@@ -4,6 +4,8 @@ import { ChevronDown, Sparkles } from "lucide-react";
 import { AnimatePresence, animate, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+import { GlowBorder } from "../shared/glow-border";
+
 interface AiAnalysis {
   overallScore: number;
   clarity: { score: number; feedback: string };
@@ -19,8 +21,7 @@ type Props = {
 
 /**
  * Visual weight by score — pink accent stroke for strong scores,
- * neutrals that recede for weaker ones. Communicates quality
- * through intensity, not hue.
+ * neutrals that recede for weaker ones.
  */
 function scoreWeight(score: number) {
   if (score >= 70) {
@@ -43,7 +44,7 @@ function scoreWeight(score: number) {
 
 // ── Animation primitives ──
 
-/** Tracks element dimensions via ResizeObserver using a callback ref. */
+/** Tracks element dimensions via ResizeObserver. */
 function useMeasure() {
   const [node, setNode] = useState<HTMLDivElement | null>(null);
   const [bounds, setBounds] = useState({ height: 0 });
@@ -61,7 +62,7 @@ function useMeasure() {
   return [setNode, bounds] as const;
 }
 
-/** Blur-in letter-by-letter text reveal. Fires onComplete after last letter. */
+/** Blur-in letter-by-letter text reveal. */
 function BlurRevealText({
   text,
   delay = 0,
@@ -105,10 +106,7 @@ function BlurRevealText({
           initial={{ filter: "blur(4px)", opacity: 0, y: 5 }}
           animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
           style={{ willChange: "transform, filter" }}
-          transition={{
-            duration: 0.15,
-            delay: delayPerChar * i,
-          }}
+          transition={{ duration: 0.15, delay: delayPerChar * i }}
           onAnimationComplete={
             i === letters.length - 1
               ? () => {
@@ -127,7 +125,7 @@ function BlurRevealText({
   );
 }
 
-/** Animates a number counting up from 0 to target. Calls onComplete when done. */
+/** Animates a number counting up from 0 to target. */
 function CountUp({
   target,
   delay = 0,
@@ -230,16 +228,14 @@ function ScoreGauge({
 
 // ── Composite components ──
 
-/** Thin gradient divider between content sections. */
 function SectionDivider() {
   return (
-    <div className="h-px bg-gradient-to-r from-transparent via-neutral-200/60 to-transparent dark:via-white/5" />
+    <div className="mx-1 h-px bg-gradient-to-r from-transparent via-neutral-200/50 to-transparent dark:via-white/[0.04]" />
   );
 }
 
 /**
- * Dimension metric row — ring gauge on the left with score centered inside,
- * label and blur-in feedback on the right. Editorial two-column layout.
+ * Dimension metric row — ring gauge left, label + feedback right.
  */
 function DimensionRow({
   label,
@@ -262,28 +258,25 @@ function DimensionRow({
 
   return (
     <motion.div
-      className="flex gap-4"
-      initial={{ opacity: 0, y: 10 }}
+      className="flex gap-4 px-5 py-4"
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Ring gauge with score centered inside */}
       <div className="shrink-0 pt-0.5">
-        <ScoreGauge score={score} size={48} strokeWidth={2.5}>
+        <ScoreGauge score={score} size={44} strokeWidth={2.5}>
           <CountUp
             target={score}
             delay={150}
-            className={`text-sm font-bold tabular-nums ${weight.text}`}
+            className={`text-[13px] font-bold tabular-nums ${weight.text}`}
           />
         </ScoreGauge>
       </div>
-
-      {/* Label + blur-reveal feedback */}
-      <div className="min-w-0 flex-1 pt-1">
-        <span className="text-sm font-semibold text-neutral-700 dark:text-white/70">
+      <div className="min-w-0 flex-1 pt-0.5">
+        <span className="text-[13px] font-semibold text-neutral-800 dark:text-white/80">
           {label}
         </span>
-        <p className="mt-1.5 text-sm leading-relaxed text-neutral-500 dark:text-white/45">
+        <p className="mt-1 text-[13px] leading-relaxed text-neutral-500 dark:text-white/40">
           {revealReady ? (
             <BlurRevealText
               text={feedback}
@@ -297,7 +290,7 @@ function DimensionRow({
   );
 }
 
-/** Centered overall score — large ring gauge hero with radial glow. */
+/** Overall score — hero ring gauge with subtle radial glow. */
 function OverallScoreSection({
   score,
   onComplete,
@@ -307,28 +300,27 @@ function OverallScoreSection({
 }) {
   return (
     <motion.div
-      className="relative flex flex-col items-center py-3"
-      initial={{ opacity: 0, scale: 0.92 }}
+      className="relative flex flex-col items-center px-5 py-5"
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Radial glow */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="size-32 rounded-full bg-pink-500/5 blur-2xl dark:bg-pink-500/10" />
+        <div className="size-28 rounded-full bg-pink-500/[0.04] blur-2xl dark:bg-pink-500/[0.08]" />
       </div>
 
-      <span className="relative mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-pink-500/70 dark:text-pink-400/50">
+      <span className="relative mb-3 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-widest text-pink-500/60 dark:text-pink-400/40">
         <Sparkles className="size-3" />
         Overall Score
       </span>
 
       <div className="relative">
-        <ScoreGauge score={score} size={80} strokeWidth={4} delay={0.3}>
+        <ScoreGauge score={score} size={72} strokeWidth={3.5} delay={0.3}>
           <CountUp
             target={score}
             delay={400}
             onComplete={onComplete}
-            className="text-2xl font-bold tabular-nums text-neutral-900 dark:text-white"
+            className="text-xl font-bold tabular-nums text-neutral-900 dark:text-white"
           />
         </ScoreGauge>
       </div>
@@ -336,7 +328,7 @@ function OverallScoreSection({
   );
 }
 
-/** Single suggestion row with numbered badge and blur-in text. */
+/** Single suggestion row with numbered badge. */
 function SuggestionRow({
   index,
   text,
@@ -348,15 +340,15 @@ function SuggestionRow({
 }) {
   return (
     <motion.li
-      className="flex gap-3 text-sm"
-      initial={{ opacity: 0, x: -6 }}
+      className="flex gap-3 text-[13px]"
+      initial={{ opacity: 0, x: -4 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
-      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-pink-500/10 text-xs font-bold text-pink-500 dark:bg-pink-500/15">
+      <span className="mt-[3px] flex size-[18px] shrink-0 items-center justify-center rounded-full bg-pink-500/10 text-[10px] font-bold text-pink-500 dark:bg-pink-500/15">
         {index + 1}
       </span>
-      <span className="text-neutral-500 dark:text-white/45">
+      <span className="text-neutral-500 dark:text-white/40">
         <BlurRevealText
           text={text}
           delay={100}
@@ -370,11 +362,6 @@ function SuggestionRow({
 
 // ── Content orchestrator ──
 
-/**
- * Sequential animation flow via step state machine.
- * Steps: 1-3 = dimension rows, 4 = overall score,
- *         5+ = suggestions, last = footer.
- */
 function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
   const [step, setStep] = useState(0);
 
@@ -389,7 +376,7 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
 
   const formattedDate = new Date(analysis.analyzedAt).toLocaleDateString(
     "en-US",
-    { year: "numeric", month: "short", day: "numeric" }
+    { year: "numeric", month: "short", day: "numeric" },
   );
 
   useEffect(() => {
@@ -398,40 +385,30 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
   }, []);
 
   return (
-    <div className="relative px-6 py-6">
-      {/* Atmospheric background gradient */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-pink-50/30 via-transparent to-violet-50/20 dark:from-pink-500/5 dark:via-transparent dark:to-violet-500/5" />
+    <div className="relative py-1">
+      {/* Atmospheric background */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-pink-50/20 via-transparent to-violet-50/10 dark:from-pink-500/[0.03] dark:via-transparent dark:to-violet-500/[0.03]" />
 
       <div className="relative">
-        {/* Dimension rows with dividers between them */}
-        <div>
-          {dimensions.map((dim, i) => (
-            <div key={dim.label}>
-              {step >= i + 1 ? (
-                <div className={i > 0 ? "pt-5" : ""}>
-                  <DimensionRow
-                    label={dim.label}
-                    score={dim.score}
-                    feedback={dim.feedback}
-                    onComplete={() => setStep(i + 2)}
-                  />
-                </div>
-              ) : null}
-              {step >= i + 2 && i < dimensions.length - 1 && (
-                <div className="mt-5">
-                  <SectionDivider />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        {/* Dimension rows */}
+        {dimensions.map((dim, i) => (
+          <div key={dim.label}>
+            {step >= i + 1 ? (
+              <DimensionRow
+                label={dim.label}
+                score={dim.score}
+                feedback={dim.feedback}
+                onComplete={() => setStep(i + 2)}
+              />
+            ) : null}
+            {step >= i + 2 && i < dimensions.length - 1 && <SectionDivider />}
+          </div>
+        ))}
 
-        {/* Overall score — hero moment after all dimension rows */}
+        {/* Overall score */}
         {step >= 4 && (
           <>
-            <div className="my-5">
-              <SectionDivider />
-            </div>
+            <SectionDivider />
             <OverallScoreSection
               score={analysis.overallScore}
               onComplete={() => setStep(5)}
@@ -439,15 +416,13 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
           </>
         )}
 
-        {/* Suggestions — one at a time */}
+        {/* Suggestions */}
         {step >= suggestionsStart && (
           <>
-            <div className="my-5">
-              <SectionDivider />
-            </div>
-            <div>
+            <SectionDivider />
+            <div className="px-5 py-4">
               <motion.p
-                className="mb-3 text-xs font-medium uppercase tracking-widest text-neutral-400 dark:text-white/30"
+                className="mb-3 text-[11px] font-medium uppercase tracking-widest text-neutral-400 dark:text-white/25"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -463,7 +438,7 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
                       text={suggestion}
                       onComplete={() => setStep(suggestionsStart + i + 1)}
                     />
-                  ) : null
+                  ) : null,
                 )}
               </ol>
             </div>
@@ -473,7 +448,7 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
         {/* Footer */}
         {step >= footerStep && (
           <motion.p
-            className="mt-6 text-center text-xs text-neutral-300 dark:text-white/15"
+            className="border-t border-neutral-100/50 px-5 py-3 text-center text-[11px] text-neutral-300 dark:border-white/[0.03] dark:text-white/15"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -488,107 +463,68 @@ function AnalysisContent({ analysis }: { analysis: AiAnalysis }) {
 
 // ── Main panel ──
 
-/**
- * AI analysis panel with sequential blur-in reveal.
- * Shimmer-accented trigger, ring gauges with scores inside,
- * atmospheric gradient interior, large hero ring for overall.
- */
 export function AiAnalysisPanel({ analysis }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [measureRef, bounds] = useMeasure();
 
   return (
-    <div
-      className={`group/panel overflow-hidden rounded-2xl border transition-all duration-500 ${
-        isOpen
-          ? "border-pink-200/50 shadow-lg shadow-pink-500/5 dark:border-pink-500/15 dark:shadow-pink-500/5"
-          : "border-neutral-200/80 hover:border-pink-300/40 dark:border-white/10 dark:hover:border-pink-500/20"
-      }`}
-    >
-      {/* Trigger */}
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        aria-controls="ai-analysis-content"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative flex w-full items-center justify-between overflow-hidden px-5 py-4 transition-all ${
-          isOpen
-            ? "bg-transparent"
-            : "bg-gradient-to-r from-pink-50/50 via-white to-violet-50/40 hover:from-pink-50/70 hover:to-violet-50/60 dark:from-pink-500/5 dark:via-transparent dark:to-violet-500/5 dark:hover:from-pink-500/10 dark:hover:to-violet-500/10"
-        }`}
-      >
-        {/* Animated shimmer line across top edge when closed */}
-        {!isOpen && (
-          <div className="absolute inset-x-0 top-0 h-px overflow-hidden">
-            <motion.div
-              className="h-full w-1/3 bg-gradient-to-r from-transparent via-pink-400/40 to-transparent"
-              animate={{ x: ["-100%", "400%"] }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-          </div>
-        )}
-
-        <div className="flex items-center gap-3">
-          <motion.div
-            className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-pink-500/10 to-violet-500/10 dark:from-pink-500/15 dark:to-violet-500/15"
-            animate={isOpen ? { rotate: 0 } : { rotate: [0, 12, -12, 0] }}
-            transition={
-              isOpen
-                ? { duration: 0.2 }
-                : {
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 4,
-                    ease: "easeInOut",
-                  }
-            }
-          >
-            <Sparkles className="size-3.5 text-pink-500" />
-          </motion.div>
-          <span className="text-sm font-semibold text-neutral-900 dark:text-white">
-            AI Pitch Analysis
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Mini score ring in trigger */}
-          <ScoreGauge score={analysis.overallScore} size={32} strokeWidth={2}>
-            <span className="text-xs font-bold tabular-nums text-neutral-700 dark:text-white/70">
-              {analysis.overallScore}
-            </span>
-          </ScoreGauge>
-          <ChevronDown
-            className={`size-4 text-neutral-400 transition-transform duration-300 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-          />
-        </div>
-      </button>
-
-      {/* Expanding content with height animation */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            id="ai-analysis-content"
-            className="overflow-hidden border-t border-neutral-100/80 dark:border-white/5"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: bounds.height, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{
-              height: { duration: 0.35, ease: "easeOut" },
-              opacity: { duration: 0.2, ease: "easeOut" },
-            }}
-          >
-            <div ref={measureRef}>
-              <AnalysisContent analysis={analysis} />
+    <GlowBorder radius={16} borderWidth={1.5} speed={4} active={!isOpen}>
+      <div className="overflow-hidden rounded-[14.5px]">
+        {/* Trigger */}
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls="ai-analysis-content"
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative flex w-full items-center justify-between px-4 py-3.5 transition-colors hover:bg-neutral-50/50 dark:hover:bg-white/[0.02]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex size-8 items-center justify-center rounded-[10px] bg-gradient-to-br from-pink-500/10 to-violet-500/10 dark:from-pink-500/15 dark:to-violet-500/15">
+              <Sparkles className="size-3.5 text-pink-500" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            <div className="text-left">
+              <span className="text-sm font-semibold text-neutral-900 dark:text-white">
+                AI Pitch Analysis
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <ScoreGauge score={analysis.overallScore} size={30} strokeWidth={2}>
+              <span className="text-[10px] font-bold tabular-nums text-neutral-700 dark:text-white/70">
+                {analysis.overallScore}
+              </span>
+            </ScoreGauge>
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <ChevronDown className="size-4 text-neutral-400 dark:text-white/30" />
+            </motion.div>
+          </div>
+        </button>
+
+        {/* Expanding content */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              id="ai-analysis-content"
+              className="overflow-hidden border-t border-neutral-100/60 dark:border-white/[0.04]"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: bounds.height, opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <div ref={measureRef}>
+                <AnalysisContent analysis={analysis} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </GlowBorder>
   );
 }
