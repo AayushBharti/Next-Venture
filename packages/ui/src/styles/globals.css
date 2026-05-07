@@ -167,6 +167,58 @@ img {
   }
 }
 
+/* ── Glow border ── */
+
+@property --glow-hue {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --glow-bg-x {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 50;
+}
+
+@property --glow-bg-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 50;
+}
+
+@keyframes glow-hue-cycle {
+  from {
+    --glow-hue: 0;
+  }
+  to {
+    --glow-hue: 360;
+  }
+}
+
+@keyframes glow-border-orbit {
+  0% {
+    --glow-bg-x: 0;
+    --glow-bg-y: 0;
+  }
+  25% {
+    --glow-bg-x: 100;
+    --glow-bg-y: 0;
+  }
+  50% {
+    --glow-bg-x: 100;
+    --glow-bg-y: 100;
+  }
+  75% {
+    --glow-bg-x: 0;
+    --glow-bg-y: 100;
+  }
+  100% {
+    --glow-bg-x: 0;
+    --glow-bg-y: 0;
+  }
+}
+
 .animate-flame {
   animation: flame-pulse 2s ease-in-out infinite;
   transform-origin: bottom center;
