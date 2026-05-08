@@ -83,8 +83,8 @@ export function DecorativePitchCardLeft() {
       description="Real-time infrastructure sync across multi-cloud environments with zero-config deployment pipelines."
       author="Alex Rivera"
       avatarInitial="A"
-      avatarColor="bg-violet-500/20"
-      gradient="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-400"
+      avatarColor="bg-blue-500/20"
+      gradient="bg-gradient-to-br from-blue-700 via-blue-500 to-indigo-400"
       radial="bg-[radial-gradient(circle_at_30%_40%,rgba(255,255,255,0.15),transparent_60%)]"
     />
   );
