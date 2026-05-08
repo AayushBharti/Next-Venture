@@ -15,6 +15,7 @@ import {
   DecorativePitchCardLeft,
   DecorativePitchCardRight,
 } from "@/components/homepage/decorative-pitch-cards";
+import { AnnouncementBadge } from "@/components/shared/announcement-badge";
 import { Pointer } from "@/components/shared/pointer";
 import type { PagebuilderType } from "@/types";
 
@@ -117,8 +118,18 @@ export function Hero(props: HeroProps) {
   return (
     <section
       ref={sectionRef}
-      className="hero-cursor relative mx-auto max-w-screen-2xl overflow-x-clip pt-32"
+      className="hero-cursor relative mx-auto max-w-screen-2xl overflow-x-clip pt-24 md:pt-36"
     >
+      {/* Decorative light rays */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[2] hidden contain-strict opacity-50 isolate lg:block"
+      >
+        <div className="absolute left-0 top-0 h-[80rem] w-[35rem] -translate-y-[350px] -rotate-45 rounded-full bg-[radial-gradient(68.54%_68.72%_at_55.02%_31.46%,hsla(0,0%,85%,.08)_0,hsla(0,0%,55%,.02)_50%,hsla(0,0%,45%,0)_80%)]" />
+        <div className="absolute left-0 top-0 h-[80rem] w-56 -rotate-45 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.06)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)] [translate:5%_-50%]" />
+        <div className="absolute left-0 top-0 h-[80rem] w-56 -translate-y-[350px] -rotate-45 bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.04)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)]" />
+      </div>
+
       <div className="container relative">
         {/* Left decorative card */}
         <motion.div
@@ -189,37 +200,19 @@ export function Hero(props: HeroProps) {
         {/* Hero content — text passes through so cards are interactive */}
         <div className="pointer-events-none relative z-20">
           {badge && (
-            <div className="flex justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-900 dark:text-white backdrop-blur-sm"
-              >
-                {/* Animated shimmer sweep */}
-                <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                {/* Gradient dot indicator */}
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-purple-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400" />
-                </span>
-
-                <span className="relative bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-                  {badge}
-                </span>
-              </motion.div>
+            <div className="pointer-events-auto flex justify-center">
+              <AnnouncementBadge text={badge} />
             </div>
           )}
 
           {title && (
-            <h1 className="mx-auto mt-6 max-w-4xl text-center text-5xl font-medium md:text-6xl lg:text-8xl">
+            <h1 className="mx-auto mt-8 max-w-4xl text-balance text-center text-4xl font-medium sm:text-5xl md:text-6xl lg:mt-16 lg:text-8xl">
               {title}
             </h1>
           )}
 
           {subtitle && (
-            <p className="mx-auto mt-6 max-w-md text-center text-base text-neutral-500 dark:text-white/50 md:mt-8 md:max-w-2xl md:text-xl">
+            <p className="mx-auto mt-6 max-w-sm text-balance text-center text-base text-muted-foreground sm:max-w-md md:mt-8 md:max-w-2xl md:text-lg">
               {subtitle}
             </p>
           )}
@@ -228,8 +221,8 @@ export function Hero(props: HeroProps) {
             <SanityButtons
               buttons={buttons}
               size="lg"
-              buttonClassName="w-full sm:w-auto"
-              className="pointer-events-auto mt-8 flex flex-col items-center justify-center gap-4 md:mt-10 md:flex-row"
+              buttonClassName="min-w-44 sm:w-auto"
+              className="pointer-events-auto mt-10 flex flex-col items-center justify-center gap-3 md:mt-12 md:flex-row"
             />
           )}
         </div>
