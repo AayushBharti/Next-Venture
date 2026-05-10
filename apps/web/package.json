@@ -35,7 +35,7 @@
     "motion": "^12.36.0",
     "next": "16.1.3",
     "next-auth": "5.0.0-beta.30",
-    "next-sanity": "^12.0.12",
+    "next-sanity": "^12.2.1",
     "next-themes": "catalog:",
     "novel": "^1.0.2",
     "react": "catalog:",
