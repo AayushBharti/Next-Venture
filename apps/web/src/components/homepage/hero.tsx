@@ -118,7 +118,7 @@ export function Hero(props: HeroProps) {
   return (
     <section
       ref={sectionRef}
-      className="hero-cursor relative mx-auto max-w-screen-2xl overflow-x-clip pt-24 md:pt-36"
+      className="hero-cursor relative overflow-x-clip pt-24 md:pt-36"
     >
       {/* Decorative light rays */}
       <div

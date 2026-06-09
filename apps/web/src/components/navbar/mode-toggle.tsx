@@ -4,9 +4,16 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { motion, useMotionValue, useTransform } from "motion/react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export function ModeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // The resolved theme is only known on the client, so defer the
+  // theme-dependent icon until after mount to avoid a hydration mismatch.
+  useEffect(() => setMounted(true), []);
+
   const isDark = resolvedTheme === "dark";
 
   return (
@@ -15,8 +22,9 @@ export function ModeToggle({ className }: { className?: string }) {
       className={cn("size-8 rounded-lg", className)}
       size="icon"
       variant="ghost"
+      aria-label="Toggle theme"
     >
-      <SolarSwitch isDark={isDark} />
+      {mounted ? <SolarSwitch isDark={isDark} /> : <span className="size-5" />}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
