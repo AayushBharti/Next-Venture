@@ -1,6 +1,8 @@
 <a name="readme-top"></a>
 
-<img width="1440" alt="VentureDen — AI-powered startup pitch platform for founders and investors" src=".github/images/img_main.png" />
+<p align="center">
+  <img width="96" alt="VentureDen logo" src=".github/images/logo.png" />
+</p>
 
 <p align="center">
   <h3 align="center">VentureDen</h3>
@@ -47,6 +49,7 @@
 <summary>Table of Contents</summary>
 
 - [About](#about)
+- [Screenshots](#-screenshots)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
@@ -68,22 +71,30 @@
 
 Every pitch is scored by AI across **clarity, market positioning, and uniqueness**, with actionable suggestions to sharpen the idea before it reaches investors. A fully editable, content-managed homepage and blog round out the experience, making VentureDen both a product and a complete, real-world reference for building a modern full-stack monorepo.
 
+## 📸 Screenshots
+
+![VentureDen home page](.github/images/screen-home.webp)
+
+![Discover startup pitches](.github/images/screen-discover.webp)
+
+![Pitch detail with the Gemini-powered AI Pitch Analysis panel](.github/images/screen-pitch.webp)
+
 ## ✨ Features
 
-| Area | What you get |
-|------|--------------|
-| **AI pitch analysis** | Every pitch scored by Google Gemini on **clarity, market positioning & uniqueness** (0–100) plus a weighted overall score and 2–3 actionable suggestions |
-| **Pitch submission** | Multi-step create flow with a Novel / Tiptap rich-text editor (headings, lists, code, quotes, tasks) for the full pitch body |
-| **Discover & search** | Browse all pitches with category filters, sort by recent / upvotes / views, and instant client-side fuzzy search via Fuse.js |
-| **Community engagement** | One-click upvotes, view counts, and threaded comments on every pitch |
-| **Founder profiles** | Public author pages with avatar, stats, and authored pitches — created automatically on first sign-in |
-| **Authentication** | GitHub OAuth via NextAuth v5; avatars uploaded to Sanity and an author document created on first login |
-| **Headless CMS** | Sanity Studio v5 with visual editing, live preview, and click-to-edit across a typed page builder |
-| **Page builder** | Composable homepage blocks — hero, logo ticker, top pitches, integrations, FAQ — editable by non-technical editors |
-| **Blog** | Rich-text articles with auto-generated table of contents and reading experience |
-| **SEO & sharing** | Dynamic OG image generation, JSON-LD structured data, and per-page metadata |
-| **PWA** | Installable app with a service worker and offline fallback page |
-| **Dark mode** | System-aware light / dark theming via next-themes |
+| Area                     | What you get                                                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AI pitch analysis**    | Every pitch scored by Google Gemini on **clarity, market positioning & uniqueness** (0–100) plus a weighted overall score and 2–3 actionable suggestions |
+| **Pitch submission**     | Multi-step create flow with a Novel / Tiptap rich-text editor (headings, lists, code, quotes, tasks) for the full pitch body                             |
+| **Discover & search**    | Browse all pitches with category filters, sort by recent / upvotes / views, and instant client-side fuzzy search via Fuse.js                             |
+| **Community engagement** | One-click upvotes, view counts, and threaded comments on every pitch                                                                                     |
+| **Founder profiles**     | Public author pages with avatar, stats, and authored pitches — created automatically on first sign-in                                                    |
+| **Authentication**       | GitHub OAuth via NextAuth v5; avatars uploaded to Sanity and an author document created on first login                                                   |
+| **Headless CMS**         | Sanity Studio v5 with visual editing, live preview, and click-to-edit across a typed page builder                                                        |
+| **Page builder**         | Composable homepage blocks — hero, logo ticker, top pitches, integrations, FAQ — editable by non-technical editors                                       |
+| **Blog**                 | Rich-text articles with auto-generated table of contents and reading experience                                                                          |
+| **SEO & sharing**        | Dynamic OG image generation, JSON-LD structured data, and per-page metadata                                                                              |
+| **PWA**                  | Installable app with a service worker and offline fallback page                                                                                          |
+| **Dark mode**            | System-aware light / dark theming via next-themes                                                                                                        |
 
 ## 🛠 Tech Stack
 
@@ -186,15 +197,15 @@ SANITY_STUDIO_API_VERSION=
 
 Run from the repo root (Turborepo fans out to both apps):
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Run web (:3000) and studio (:3333) in dev mode |
-| `pnpm dev:web` | Run only the Next.js app |
-| `pnpm dev:studio` | Run only the Sanity Studio |
-| `pnpm build` | Production build of all apps |
-| `pnpm lint` | Lint with Biome / Ultracite |
-| `pnpm format` | Format and auto-fix |
-| `pnpm check-types` | Type-check with TypeScript |
+| Command            | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `pnpm dev`         | Run web (:3000) and studio (:3333) in dev mode |
+| `pnpm dev:web`     | Run only the Next.js app                       |
+| `pnpm dev:studio`  | Run only the Sanity Studio                     |
+| `pnpm build`       | Production build of all apps                   |
+| `pnpm lint`        | Lint with Biome / Ultracite                    |
+| `pnpm format`      | Format and auto-fix                            |
+| `pnpm check-types` | Type-check with TypeScript                     |
 
 After editing any Sanity schema, regenerate types from `apps/studio`:
 
@@ -234,9 +245,9 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) be
 
 ## 📃 Deployment
 
-| Method | Description | Action |
-| :--- | :--- | :--- |
-| **🔧 Manual Build** | Create an optimized production build. | `pnpm build` |
+| Method                     | Description                              | Action                                                                                                                                               |
+| :------------------------- | :--------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🔧 Manual Build**        | Create an optimized production build.    | `pnpm build`                                                                                                                                         |
 | **▲ Vercel (Recommended)** | Deploy instantly on the Vercel platform. | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAayushBharti%2FVentureDen) |
 
 For more details, check the [Next.js deployment docs](https://nextjs.org/docs/deployment).
